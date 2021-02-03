@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 /*
  * Primary file for API
+ *
  */
 
 // Dependencies
@@ -9,6 +11,7 @@ const url = require('url');
 const { StringDecoder } = require('string_decoder');
 const config = require('./config');
 const fs = require('fs');
+const _data = require('./lib/data');
 
 // Instantiate the HTTP server
 const httpServer = http.createServer((req, res) => {
