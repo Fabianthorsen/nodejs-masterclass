@@ -7,7 +7,7 @@
 // Dependencies
 const http = require('http');
 const url = require('url');
-const StringDecoder = require('string_decoder').StringDecoder;
+const { StringDecoder } = require('string_decoder');
 
 // The server should respond to requests with a string
 const server = http.createServer((req, res) => {
@@ -28,7 +28,7 @@ const server = http.createServer((req, res) => {
   const headers = req.headers;
 
   // Get the payload, if any
-  const decoder = new StringDecoder('utf-8');
+  const decoder = new StringDecoder('utf8');
   let buffer = '';
 
   req.on('data', (data) => {
@@ -37,11 +37,36 @@ const server = http.createServer((req, res) => {
   req.on('end', () => {
     buffer += decoder.end();
 
-    // Send response
-    res.end('Hello World\n');
+    // Choose the handler this request should go to. If not found then use notFound handler
+    const chosenHandler = router[trimmedPath] || handlers.notFound;
 
-    // Log the request path
-    console.log('Request recieved with this payload: ', buffer);
+    // Construct the data object to send to the handler
+    const data = {
+      trimmedPath: trimmedPath,
+      queryStringObject: queryStringObject,
+      method: method,
+      headers: headers,
+      payload: buffer,
+    };
+
+    // Route the request specified in the router
+    chosenHandler(data, function (statusCode, payload) {
+      // Use the status code called back by the handler, or default to 200
+      statusCode = typeof statusCode == 'number' ? statusCode : 200;
+
+      // Use the payload called back by the handler, or default to empty object
+      payload = typeof payload == 'object' ? payload : {};
+
+      // Convert the payload to a string
+      const payloadString = JSON.stringify(payload);
+
+      // Return response
+      res.writeHead(statusCode);
+      res.end(payloadString);
+
+      // Log the request path
+      console.log('Request this respnse: ', statusCode, payloadString);
+    });
   });
 });
 
@@ -49,3 +74,22 @@ const server = http.createServer((req, res) => {
 server.listen(3000, () => {
   console.log('The server is listening on port 3000');
 });
+
+// Define handlers
+const handlers = {};
+
+// Sample handler
+handlers.sample = (data, callback) => {
+  // Callback a http status code, and a payload object
+  callback(406, { name: 'Sample handler' });
+};
+
+// Not found handler
+handlers.notFound = (data, callback) => {
+  callback(404);
+};
+
+// Define a request router
+const router = {
+  sample: handlers.sample,
+};
