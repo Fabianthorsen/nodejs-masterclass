@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 /*
  * Primary file for API
- *
  */
 
 // Dependencies
@@ -9,9 +8,11 @@ const http = require('http');
 const https = require('https');
 const url = require('url');
 const { StringDecoder } = require('string_decoder');
-const config = require('./config');
+const config = require('./lib/config');
 const fs = require('fs');
 const _data = require('./lib/data');
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 // Instantiate the HTTP server
 const httpServer = http.createServer((req, res) => {
@@ -76,7 +77,7 @@ const unifiedServer = (req, res) => {
       queryStringObject: queryStringObject,
       method: method,
       headers: headers,
-      payload: buffer,
+      payload: helpers.parseJsonToObject(buffer),
     };
 
     // Route the request specified in the router
@@ -101,20 +102,8 @@ const unifiedServer = (req, res) => {
   });
 };
 
-// Define handlers
-const handlers = {};
-
-// Ping handler
-handlers.ping = (data, callback) => {
-  callback(200);
-};
-
-// Not found handler
-handlers.notFound = (data, callback) => {
-  callback(404);
-};
-
 // Define a request router
 const router = {
   ping: handlers.ping,
+  users: handlers.users,
 };
