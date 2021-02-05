@@ -32,5 +32,32 @@ helpers.parseJsonToObject = function (str) {
   }
 };
 
+// Create a string of random alphanumeric characters of a given length
+helpers.createRandomString = function (strLenght) {
+  const strLength =
+    typeof strLenght == 'number' && strLenght > 0 ? strLenght : false;
+  if (strLength) {
+    // Define all possible characters that can go into the string
+    const possibleCharacters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+    // Start the string
+    let str = '';
+
+    for (let i = 0; i < strLenght; i++) {
+      // Get random char from possible characters
+      const randomChar = possibleCharacters.charAt(
+        Math.floor(Math.random() * possibleCharacters.length)
+      );
+      // Append to final string
+      str += randomChar;
+    }
+
+    // Return final string
+    return str;
+  } else {
+    return false;
+  }
+};
+
 // Export the module
 module.exports = helpers;
